@@ -198,21 +198,39 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             int newY = oldY + dy;
             Room currentRoom = player.getCurrentRoom();
 
+            // self-correct: if player is stuck in unwalkable tile, reset to spawn
+            if (!currentRoom.isWalkable(oldX, oldY)) {
+                int[] sp = currentRoom.getSpawnPoint();
+                if (sp != null) {
+                    player.setPosX(sp[0]);
+                    player.setPosY(sp[1]);
+                    oldX = sp[0];
+                    oldY = sp[1];
+                    newX = oldX + dx;
+                    newY = oldY + dy;
+                }
+            }
+
             // diagonal: check corner tiles too
             if (dx != 0 && dy != 0) {
                 if (!currentRoom.isWalkable(newX, newY)
                         || !currentRoom.isWalkable(newX, oldY)
                         || !currentRoom.isWalkable(oldX, newY)) {
+                    playerPush(player);
                     return;
                 }
             } else if (!currentRoom.isWalkable(newX, newY)) {
+                playerPush(player);
                 return;
             }
 
             Direction doorDir = currentRoom.getDoorDirection(newX, newY);
             if (doorDir != null) {
                 Room nextRoom = currentRoom.getExitMap().get(doorDir.toLower());
-                if (nextRoom == null) return;
+                if (nextRoom == null) {
+                    playerPush(player);
+                    return;
+                }
                 if (nextRoom.isPortal()) {
                     Room randomRoom = game.getRandomRoom();
                     if (randomRoom != null) {
@@ -223,6 +241,14 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 String oldRoomName = oldRoom.getName();
                 player.moveTo(nextRoom);
                 int[] sp = nextRoom.getSpawnPoint();
+                // safeguard: if target spawn is unwalkable, go to starting room
+                if (!nextRoom.isWalkable(sp[0], sp[1])) {
+                    Room startRoom = game.getStartingRoom();
+                    if (startRoom != null) {
+                        nextRoom = startRoom;
+                        sp = nextRoom.getSpawnPoint();
+                    }
+                }
                 player.setPosX(sp[0]);
                 player.setPosY(sp[1]);
                 onPlayerMoved(player, oldRoomName);
@@ -240,7 +266,6 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         } catch (Exception ignored) {
         }
     }
-
     private void handleInteract(Player player) {
         Room currentRoom = player.getCurrentRoom();
         AbstractItem item = currentRoom.takeItemAt(player.getPosX(), player.getPosY());

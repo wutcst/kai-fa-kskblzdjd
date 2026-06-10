@@ -238,7 +238,7 @@ public class Room {
     public void setSpawnPoint(int x, int y) { this.spawnPoint = new int[]{x, y}; }
 
     public boolean isWalkable(int x, int y) {
-        if (tiles == null) return false;
+        if (tiles == null) return true;
         if (x < 0 || x >= width || y < 0 || y >= height) return false;
         return tiles[y][x] != TileType.WALL;
     }
