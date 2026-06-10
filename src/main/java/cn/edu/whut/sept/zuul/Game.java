@@ -259,10 +259,16 @@ public class Game {
         this.webSocketHandler = handler;
     }
 
-    public Room getRandomRoom() {
+    public Room getRandomRoom(Room... exclude) {
         List<Room> nonPortal = new ArrayList<>();
+        java.util.Set<Room> excludeSet = new java.util.HashSet<>();
+        if (exclude != null) {
+            for (Room r : exclude) {
+                if (r != null) excludeSet.add(r);
+            }
+        }
         for (Room room : allRooms) {
-            if (!room.isPortal()) {
+            if (!room.isPortal() && !excludeSet.contains(room)) {
                 nonPortal.add(room);
             }
         }

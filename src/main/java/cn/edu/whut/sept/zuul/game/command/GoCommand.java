@@ -40,7 +40,7 @@ public class GoCommand extends Command {
         if (nextRoom.isPortal()) {
             game.getMessageBridge().send(
                 new SinglePlayerMessage("一股神秘的力量将你传送..."), player);
-            Room randomRoom = game.getRandomRoom();
+            Room randomRoom = game.getRandomRoom(currentRoom);
             if (randomRoom != null) {
                 player.moveTo(randomRoom);
             } else {

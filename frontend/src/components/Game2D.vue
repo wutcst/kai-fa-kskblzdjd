@@ -326,6 +326,7 @@ function connect(){
         Object.assign(player,p.data)
         srvX=p.data.posX||1;srvY=p.data.posY||1
         if(room.tiles&&room.tiles[clY]&&room.tiles[clY][clX]===1){clX=srvX;clY=srvY;subX=0;subY=0}
+        if(room.tiles&&room.tiles[clY]&&room.tiles[clY][clX]===1){clX=srvX;clY=srvY;subX=0;subY=0}
         if(p.data.currentRoomName!==or){
           clX=srvX;clY=srvY;subX=0;subY=0
         }else if(Math.abs(clX-srvX)>2||Math.abs(clY-srvY)>2){

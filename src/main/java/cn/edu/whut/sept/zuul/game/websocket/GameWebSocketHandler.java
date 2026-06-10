@@ -183,7 +183,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void handleMove(Player player, WebSocketIncomingPayload payload) {
+        private void handleMove(Player player, WebSocketIncomingPayload payload) {
         String dataStr = payload.getData();
         if (dataStr == null) return;
         try {
@@ -232,7 +232,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                     return;
                 }
                 if (nextRoom.isPortal()) {
-                    Room randomRoom = game.getRandomRoom();
+                    Room randomRoom = game.getRandomRoom(currentRoom);
                     if (randomRoom != null) {
                         nextRoom = randomRoom;
                     }
@@ -266,7 +266,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         } catch (Exception ignored) {
         }
     }
-    private void handleInteract(Player player) {
+
+private void handleInteract(Player player) {
         Room currentRoom = player.getCurrentRoom();
         AbstractItem item = currentRoom.takeItemAt(player.getPosX(), player.getPosY());
         if (item != null && player.takeItem(item)) {
