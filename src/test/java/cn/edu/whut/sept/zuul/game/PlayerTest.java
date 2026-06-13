@@ -3,6 +3,8 @@ package cn.edu.whut.sept.zuul.game;
 import cn.edu.whut.sept.zuul.game.item.Sword;
 import cn.edu.whut.sept.zuul.game.item.BloodVial;
 import cn.edu.whut.sept.zuul.game.item.StormCleaver;
+import cn.edu.whut.sept.zuul.game.item.DragonscaleBulwark;
+import cn.edu.whut.sept.zuul.game.item.BerserkerTotem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +16,7 @@ class PlayerTest {
 
     @BeforeEach
     void setUp() {
-        room = new Room("test", "测试房间");
+        room = new Room("test", "test room");
         player = new Player(1, "TestPlayer", room);
     }
 
@@ -95,14 +97,14 @@ class PlayerTest {
 
     @Test
     void shouldMoveToRoom() {
-        Room other = new Room("other", "其他房间");
+        Room other = new Room("other", "other room");
         player.moveTo(other);
         assertEquals(other, player.getCurrentRoom());
     }
 
     @Test
     void shouldGoBack() {
-        room.setExit("east", new Room("east", "东方"));
+        room.setExit("east", new Room("east", "east"));
         player.goBack();
         assertEquals("test", player.getCurrentRoom().getName());
     }
@@ -120,5 +122,113 @@ class PlayerTest {
         player.setPosY(5);
         assertEquals(7, player.getPosX());
         assertEquals(5, player.getPosY());
+    }
+
+    // ========== equipArmor / discardArmor ==========
+
+    @Test
+    void shouldEquipArmor() {
+        DragonscaleBulwark armor = new DragonscaleBulwark();
+        int defenseBefore = player.getDefense();
+        player.takeItem(armor);
+        assertTrue(player.equipArmor(armor));
+        assertEquals(armor, player.getEquippedArmor());
+        assertEquals(defenseBefore + 12, player.getDefense());
+    }
+
+    @Test
+    void shouldUnequipArmor() {
+        DragonscaleBulwark armor = new DragonscaleBulwark();
+        player.takeItem(armor);
+        player.equipArmor(armor);
+        player.unequipArmor();
+        assertNull(player.getEquippedArmor());
+        assertEquals(5, player.getDefense());
+        assertTrue(player.getBag().contains(armor));
+    }
+
+    @Test
+    void shouldDiscardArmor() {
+        DragonscaleBulwark armor = new DragonscaleBulwark();
+        player.takeItem(armor);
+        player.equipArmor(armor);
+        assertEquals(5 + 12, player.getDefense());
+
+        player.discardArmor();
+        assertNull(player.getEquippedArmor());
+        assertEquals(5, player.getDefense());
+        assertFalse(player.getBag().contains(armor));
+    }
+
+    @Test
+    void shouldDiscardArmorWhenNone() {
+        assertNull(player.getEquippedArmor());
+        assertDoesNotThrow(() -> player.discardArmor());
+        assertNull(player.getEquippedArmor());
+    }
+
+    @Test
+    void shouldDiscardPassiveArmorWithoutDroppedBy() {
+        BerserkerTotem totem = new BerserkerTotem();
+        player.takeItem(totem);
+        player.equipArmor(totem);
+        assertEquals(totem, player.getEquippedArmor());
+
+        player.discardArmor();
+        assertNull(player.getEquippedArmor());
+        assertFalse(player.getBag().contains(totem));
+    }
+
+    @Test
+    void shouldRejectWeaponAsArmor() {
+        Sword sword = new Sword();
+        player.takeItem(sword);
+        assertFalse(player.equipArmor(sword));
+        assertNull(player.getEquippedArmor());
+    }
+
+    @Test
+    void shouldRejectConsumableAsArmor() {
+        BloodVial vial = new BloodVial();
+        player.takeItem(vial);
+        assertFalse(player.equipArmor(vial));
+        assertNull(player.getEquippedArmor());
+    }
+
+    @Test
+    void shouldEquipPassiveArmorWithoutDuplicateTakenBy() {
+        BerserkerTotem totem = new BerserkerTotem();
+        int attackBefore = player.getAttack();
+        player.takeItem(totem);
+        assertTrue(player.equipArmor(totem));
+        assertEquals(attackBefore, player.getAttack());
+    }
+
+    @Test
+    void shouldUnequipPassiveArmorWithoutDuplicateDroppedBy() {
+        BerserkerTotem totem = new BerserkerTotem();
+        player.takeItem(totem);
+        player.equipArmor(totem);
+        int attackBefore = player.getAttack();
+
+        player.unequipArmor();
+        assertEquals(attackBefore, player.getAttack());
+        assertTrue(player.getBag().contains(totem));
+    }
+
+    @Test
+    void shouldEquipArmorReplaceExisting() {
+        DragonscaleBulwark first = new DragonscaleBulwark();
+        DragonscaleBulwark second = new DragonscaleBulwark();
+        player.takeItem(first);
+        player.takeItem(second);
+        player.equipArmor(first);
+        assertEquals(first, player.getEquippedArmor());
+        assertEquals(5 + 12, player.getDefense());
+
+        player.equipArmor(second);
+        assertEquals(second, player.getEquippedArmor());
+        assertEquals(5 + 12, player.getDefense());
+        assertTrue(player.getBag().contains(first));
     }
 }
