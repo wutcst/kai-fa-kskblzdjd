@@ -269,8 +269,13 @@ function itemDesc(it:any){
 }
 
 function pushMsg(txt:string,cls=''){
-  msgLog.value.push({txt,cls,t:Date.now()})
+  const msg={txt,cls,t:Date.now()}
+  msgLog.value.push(msg)
   if(msgLog.value.length>6) msgLog.value.shift()
+  setTimeout(()=>{
+    const idx=msgLog.value.indexOf(msg)
+    if(idx>=0) msgLog.value.splice(idx,1)
+  },5000)
 }
 function hasItemAt(x:number,y:number){
   if(!room.items) return false
