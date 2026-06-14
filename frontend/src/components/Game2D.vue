@@ -518,6 +518,8 @@ function connect(){
       }else if(p.type==='roundReset'){
         serverRoundEnd.value=Date.now()+parseInt(p.data||'600')*1000
         pushMsg('新的一轮开始！所有玩家已重置','kill')
+        rmtP={};prevHp={};hitFx=[];atkFx=[];dmgNums=[]
+        clX=srvX;clY=srvY;subX=0;subY=0
       }else if(p.type==='rankings'){
         try{rankings.value=JSON.parse(p.data)}catch(e){}
       }else if(p.type==='messagePush'){
