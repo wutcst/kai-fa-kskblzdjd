@@ -28,7 +28,7 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/wutcst/kai-fa-kskblzdjd-app:latest
+    image: crpi-tobby7r7mzpghkkv.cn-shenzhen.personal.cr.aliyuncs.com/zy-study/zuul-app:latest
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MYSQL_HOST: mysql
@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: ghcr.io/wutcst/kai-fa-kskblzdjd-nginx:latest
+    image: crpi-tobby7r7mzpghkkv.cn-shenzhen.personal.cr.aliyuncs.com/zy-study/zuul-nginx:latest
     ports:
       - "80:80"
     depends_on:
