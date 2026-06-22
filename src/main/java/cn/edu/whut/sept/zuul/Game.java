@@ -277,6 +277,7 @@ public class Game {
             p.setPosX(sp[0]);
             p.setPosY(sp[1]);
             p.setMaxCapacity(50);
+            p.setKills(0);
             if (p.getEquippedWeapon() != null) p.unequipWeapon();
             if (p.getEquippedArmor() != null) p.unequipArmor();
             List<cn.edu.whut.sept.zuul.game.item.AbstractItem> toDrop = new ArrayList<>(p.getBag());
