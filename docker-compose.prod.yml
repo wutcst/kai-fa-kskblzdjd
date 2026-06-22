@@ -1,0 +1,57 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: zuul
+      MYSQL_USER: ${MYSQL_USER:-zuul}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-zuul123}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD:-zuulredis}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-zuulredis}", "ping"]
+      interval: 10s
+      retries: 5
+
+  app:
+    image: ghcr.io/wutcst/kai-fa-kskblzdjd-app:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_HOST: mysql
+      MYSQL_USER: ${MYSQL_USER:-zuul}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-zuul123}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-zuulredis}
+      JWT_SECRET: ${JWT_SECRET:-WorldOfZuulSecretKeyForJWTToken2026}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    image: ghcr.io/wutcst/kai-fa-kskblzdjd-nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      app:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
